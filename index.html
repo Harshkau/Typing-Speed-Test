@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Typing Speed Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background-color: rgb(9, 243, 192);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 24px;
+      text-align: center;
+      color: #333;
+    }
+
+    p {
+      font-size: 18px;
+      color: #666;
+    }
+
+    select, textarea {
+      width: 400px;
+      height: 40px;
+      font-size: 16px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 5px;
+      font-family: Arial, bold;
+    }
+
+    #timeRemaining {
+      font-size: 20px;
+      color: #f00;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    #textToType {
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    #userInput {
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    #typingSpeed {
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    #timeRemaining {
+      animation: fadeIn 1s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Typing Speed Test</h1>
+    <p>Choose a duration and type the following text:</p>
+    <select id="durationSelect">
+      <option>select the timer</option>
+      <option value="60">1 minute</option>
+      <option value="300">5 minutes</option>
+      <option value="600">10 minutes</option>
+    </select>
+    <br><br>
+    <p id="textToType">The quick brown fox jumps over the lazy dog.</p>
+    <textarea id="userInput" placeholder="Start typing here..."></textarea>
+    <p>Typing speed: <span id="typingSpeed">0</span> WPM (words per minute)</p>
+    <p>Time remaining: <span id="timeRemaining"></span></p>
+  </div>
+
+  <script>
+    const textToTypeElement = document.getElementById('textToType');
+    const userInputElement = document.getElementById('userInput');
+    const typingSpeedElement = document.getElementById('typingSpeed');
+    const durationSelect = document.getElementById('durationSelect');
+    const timeRemainingElement = document.getElementById('timeRemaining');
+    let startTime, endTime, durationTimer;
+
+    durationSelect.addEventListener('change', function() {
+      const duration = parseInt(durationSelect.value);
+      resetTest();
+      startTimer(duration);
+    });
+
+    function startTimer(duration) {
+      let remainingTime = duration;
+      clearInterval(durationTimer);
+      durationTimer = setInterval(() => {
+        const minutes = Math.floor(remainingTime / 60);
+        const seconds = remainingTime % 60;
+        timeRemainingElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        remainingTime--;
+        if (remainingTime < 0) {
+          clearInterval(durationTimer);
+          endTest();
+        }
+      }, 1000);
+    }
+
+    // Start timing when user starts typing
+    userInputElement.addEventListener('keydown', function(event) {
+      if (!startTime) {
+        startTime = new Date();
+      }
+    });
+
+    // Calculate typing speed when user finishes typing
+    userInputElement.addEventListener('input', function() {
+      const textToType = textToTypeElement.innerText.trim().split(' ');
+      const userInput = userInputElement.value.trim().split(' ');
+      const numWordsTyped = userInput.filter(word => word !== '').length;
+      const elapsedTimeSeconds = (new Date() - startTime) / 1000;
+      const typingSpeed = Math.round((numWordsTyped / elapsedTimeSeconds) * 60);
+
+      typingSpeedElement.textContent = typingSpeed;
+
+      // Check if user has finished typing the entire passage
+      if (userInput.join(' ') === textToType.join(' ')) {
+        endTest();
+      }
+    });
+
+    function endTest() {
+      endTime = new Date();
+      clearInterval(durationTimer);
+      const totalTimeSeconds = (endTime - startTime) / 1000;
+      alert(`Congratulations! You typed the passage in ${Math.round(totalTimeSeconds)} seconds.`);
+      resetTest();
+    }
+
+    function resetTest() {
+      startTime = null;
+      userInputElement.value = '';
+      typingSpeedElement.textContent = '0';
+      timeRemainingElement.textContent = '';
+    }
+  </script>
+</body>
+</html>
